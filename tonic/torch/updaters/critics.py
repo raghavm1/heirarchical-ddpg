@@ -69,7 +69,16 @@ class DeterministicQLearning:
         self, observations, actions, next_observations, rewards, discounts
     ):
         with torch.no_grad():
-            next_actions = self.model.target_actor(next_observations)
+            # next_actions = self.model.target_actor(next_observations)
+            next_actions = []
+            for t_a in self.model.target_actors:
+                next_actions.append(t_a(next_observations).squeeze(-1)) # TODO check tensor
+            # import pdb; pdb.set_trace()
+            next_actions = torch.stack(next_actions)
+            next_actions = torch.transpose(next_actions,0,1)
+            # print('----------')
+            # print('next_actions shape: ', next_actions.shape)
+            # print('----------')
             next_values = self.model.target_critic(
                 next_observations, next_actions)
             returns = rewards + discounts * next_values

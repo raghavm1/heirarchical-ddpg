@@ -28,13 +28,19 @@ class ActorCritic(torch.nn.Module):
 
 class ActorCriticWithTargets(torch.nn.Module):
     def __init__(
-        self, actor, critic, observation_normalizer=None,
+        self, actor, num_actors, critic, observation_normalizer=None,
         return_normalizer=None, target_coeff=0.005
     ):
         super().__init__()
-        self.actor = actor
+        self.actors = []
+        self.target_actors = []
+        # self.actor = actor
+        for a in range(num_actors):
+            self.actors.append(copy.deepcopy(actor))
         self.critic = critic
         self.target_actor = copy.deepcopy(actor)
+        for a in range(num_actors):
+            self.target_actors.append(copy.deepcopy(self.actors[a]))
         self.target_critic = copy.deepcopy(critic)
         self.observation_normalizer = observation_normalizer
         self.return_normalizer = return_normalizer
@@ -43,19 +49,31 @@ class ActorCriticWithTargets(torch.nn.Module):
     def initialize(self, observation_space, action_space):
         if self.observation_normalizer:
             self.observation_normalizer.initialize(observation_space.shape)
-        self.actor.initialize(
+        # self.actor.initialize(
+        #     observation_space, action_space, self.observation_normalizer)
+        for a in self.actors:
+            a.initialize(
             observation_space, action_space, self.observation_normalizer)
         self.critic.initialize(
             observation_space, action_space, self.observation_normalizer,
             self.return_normalizer)
-        self.target_actor.initialize(
+        # self.target_actor.initialize(
+        #     observation_space, action_space, self.observation_normalizer)
+        for a in self.target_actors:
+            a.initialize(
             observation_space, action_space, self.observation_normalizer)
         self.target_critic.initialize(
             observation_space, action_space, self.observation_normalizer,
             self.return_normalizer)
-        self.online_variables = models.trainable_variables(self.actor)
+        # self.online_variables = models.trainable_variables(self.actor)
+        self.online_variables = []
+        for a in self.actors:
+             self.online_variables += models.trainable_variables(a)
         self.online_variables += models.trainable_variables(self.critic)
-        self.target_variables = models.trainable_variables(self.target_actor)
+        self.target_variables = []
+        # self.target_variables = models.trainable_variables(self.target_actor)
+        for a in self.target_actors:
+            self.target_variables += models.trainable_variables(a)
         self.target_variables += models.trainable_variables(self.target_critic)
         for target in self.target_variables:
             target.requires_grad = False

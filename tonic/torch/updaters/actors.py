@@ -164,8 +164,14 @@ class DeterministicPolicyGradient:
 
     def initialize(self, model):
         self.model = model
-        self.variables = models.trainable_variables(self.model.actor)
-        self.optimizer = self.optimizer(self.variables)
+        # self.variables = models.trainable_variables(self.model.actor)
+        self.variables = []
+        self.optimizers = []
+        for a in self.model.actors:
+            variables = models.trainable_variables(a)
+            self.variables.append(variables)
+            self.optimizers.append(self.optimizer(variables))
+        # self.optimizer = self.optimizer(self.variables)
 
     def __call__(self, observations):
         critic_variables = models.trainable_variables(self.model.critic)
@@ -173,15 +179,25 @@ class DeterministicPolicyGradient:
         for var in critic_variables:
             var.requires_grad = False
 
-        self.optimizer.zero_grad()
-        actions = self.model.actor(observations)
+        
+        # self.optimizer.zero_grad()
+        # actions = self.model.actor(observations)
+        actions = []
+        for i in range(len(self.optimizers)):
+            self.optimizers[i].zero_grad()
+            actions.append(self.model.actors[i](observations).squeeze(-1))
+        actions = torch.stack(actions)
+        actions = torch.transpose(actions,0,1)
+        
         values = self.model.critic(observations, actions)
         loss = -values.mean()
 
         loss.backward()
         if self.gradient_clip > 0:
             torch.nn.utils.clip_grad_norm_(self.variables, self.gradient_clip)
-        self.optimizer.step()
+        # self.optimizer.step()
+        for o in self.optimizers:
+            o.step()
 
         for var in critic_variables:
             var.requires_grad = True

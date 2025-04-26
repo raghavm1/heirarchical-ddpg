@@ -8,13 +8,15 @@ def default_model():
     return models.ActorCriticWithTargets(
         actor=models.Actor(
             encoder=models.ObservationEncoder(),
-            torso=models.MLP((256, 256), torch.nn.ReLU),
+            # torso=models.MLP((256, 256), torch.nn.ReLU),
+            torso=models.MLP((64, 64), torch.nn.ReLU),
             head=models.DeterministicPolicyHead()),
         critic=models.Critic(
             encoder=models.ObservationActionEncoder(),
             torso=models.MLP((256, 256), torch.nn.ReLU),
             head=models.ValueHead()),
-        observation_normalizer=normalizers.MeanStd())
+        observation_normalizer=normalizers.MeanStd(),
+        num_actors = 4) # TODO get 4 from action size
 
 
 class DDPG(agents.Agent):
@@ -78,7 +80,13 @@ class DDPG(agents.Agent):
     def _greedy_actions(self, observations):
         observations = torch.as_tensor(observations, dtype=torch.float32)
         with torch.no_grad():
-            return self.model.actor(observations)
+            # return self.model.actor(observations)
+            actions = []
+            for a in self.model.actors:
+                actions.append(a(observations).squeeze(-1)) # TODO check if need tensor
+            actions = torch.stack(actions)
+            actions = torch.transpose(actions, 0, 1)
+            return actions
 
     def _policy(self, observations):
         return self._greedy_actions(observations).numpy()
