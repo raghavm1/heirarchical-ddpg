@@ -3,6 +3,7 @@ import setuptools
 
 setuptools.setup(
     name='tonic',
+    py_modules=[],
     description='Tonic RL Library',
     url='https://github.com/fabiopardo/tonic',
     version='0.3.0',
