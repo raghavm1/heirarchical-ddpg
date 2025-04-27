@@ -71,8 +71,23 @@ class DeterministicQLearning:
         with torch.no_grad():
             # next_actions = self.model.target_actor(next_observations)
             next_actions = []
+            
+            index = 0
+            present_action = []
             for t_a in self.model.target_actors:
-                next_actions.append(t_a(next_observations).squeeze(-1)) # TODO check tensor
+                if index == 0:
+                    next_actions.append(t_a(next_observations).squeeze(-1)) # TODO check tensor
+                    present_action.append(next_actions[0])
+                else:
+                    present_action_tensor = torch.stack(present_action, dim=-1)
+                    new_observations = torch.cat([present_action_tensor, observations],dim=-1)
+                    # new_observations = torch.tensor(new_observations)
+                    # print('new observations :', new_observations.shape)
+                    out = t_a(new_observations)
+                    next_actions.append(out.squeeze(-1))
+                    present_action.append(next_actions[index])
+                index += 1
+
             # import pdb; pdb.set_trace()
             next_actions = torch.stack(next_actions)
             next_actions = torch.transpose(next_actions,0,1)

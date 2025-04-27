@@ -78,9 +78,14 @@ class Critic(torch.nn.Module):
         self, observation_space, action_space, observation_normalizer=None,
         return_normalizer=None
     ):
+        if observation_normalizer:
+            self.observation_normalizer = observation_normalizer.initialize(observation_space.shape)
         size = self.encoder.initialize(
             observation_space=observation_space, action_space=action_space,
-            observation_normalizer=observation_normalizer)
+            observation_normalizer=self.observation_normalizer)
+        # size = self.encoder.initialize(
+        #     observation_space=observation_space, action_space=action_space,
+        #     observation_normalizer=observation_normalizer)
         size = self.torso.initialize(size)
         self.head.initialize(size, return_normalizer)
 

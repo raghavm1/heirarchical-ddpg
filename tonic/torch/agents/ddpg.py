@@ -13,7 +13,7 @@ def default_model():
             head=models.DeterministicPolicyHead()),
         critic=models.Critic(
             encoder=models.ObservationActionEncoder(),
-            torso=models.MLP((256, 256), torch.nn.ReLU),
+            torso=models.MLP((64, 64), torch.nn.ReLU),
             head=models.ValueHead()),
         observation_normalizer=normalizers.MeanStd(),
         num_actors = 4) # TODO get 4 from action size
@@ -66,7 +66,11 @@ class DDPG(agents.Agent):
             terminations=terminations)
 
         # Prepare to update the normalizers.
-        if self.model.observation_normalizer:
+        # if self.model.observation_normalizer:
+        #     self.model.observation_normalizer.record(self.last_observations)
+        # if self.model.return_normalizer:
+        #     self.model.return_normalizer.record(rewards)
+        if self.model.observation_normalizer:           # TODO whether to update all normalizers or a single
             self.model.observation_normalizer.record(self.last_observations)
         if self.model.return_normalizer:
             self.model.return_normalizer.record(rewards)
@@ -81,9 +85,21 @@ class DDPG(agents.Agent):
         observations = torch.as_tensor(observations, dtype=torch.float32)
         with torch.no_grad():
             # return self.model.actor(observations)
+            # actions.append(a(observations).squeeze(-1)) # TODO check if need tensor
             actions = []
-            for a in self.model.actors:
-                actions.append(a(observations).squeeze(-1)) # TODO check if need tensor
+            present_action = []
+            for i in range(len(self.model.actors)):
+                if i == 0:
+                    act = self.model.actors[i](observations).squeeze(-1)
+                    actions.append(act)
+                    present_action.append(act)
+                else:
+                    present_action_tensor = torch.stack(present_action, dim=-1)  # Stack into tensor
+                    new_observations = torch.cat([present_action_tensor, observations], dim=-1)
+                    act = self.model.actors[i](new_observations).squeeze(-1)
+                    actions.append(act)
+                    present_action.append(act)
+
             actions = torch.stack(actions)
             actions = torch.transpose(actions, 0, 1)
             return actions

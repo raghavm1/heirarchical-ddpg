@@ -182,10 +182,42 @@ class DeterministicPolicyGradient:
         
         # self.optimizer.zero_grad()
         # actions = self.model.actor(observations)
+        
+        # actions = []
+        # present_action = []
+        # for i in range(len(self.optimizers)):
+        #     self.optimizers[i].zero_grad()
+        #     if i==0:
+        #         actions.append(self.model.actors[i](observations).squeeze(-1))
+        #         present_action.append(actions[0])
+        #     else:
+        #         new_observations = present_action + observations
+        #         new_observations = torch.tensor(new_observations)
+        #         print('new observations shape:', new_observations.shape)
+        #         actions.append(self.model.actors[i](new_observations).squeeze(-1))
+        #         present_action.append(actions[i])
+
         actions = []
+        present_action = []
         for i in range(len(self.optimizers)):
             self.optimizers[i].zero_grad()
-            actions.append(self.model.actors[i](observations).squeeze(-1))
+            
+            if i == 0:
+                act = self.model.actors[i](observations).squeeze(-1)
+                actions.append(act)
+                present_action.append(act)
+            else:
+                present_action_tensor = torch.stack(present_action, dim=-1)  # Stack into tensor
+                # Now concatenate
+                new_observations = torch.cat([present_action_tensor, observations], dim=-1)
+
+                # print('new observations shape:', new_observations.shape)
+
+                act = self.model.actors[i](new_observations).squeeze(-1)
+                actions.append(act)
+                present_action.append(act)
+                
+
         actions = torch.stack(actions)
         actions = torch.transpose(actions,0,1)
         

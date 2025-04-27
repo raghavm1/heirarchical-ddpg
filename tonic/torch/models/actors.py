@@ -123,17 +123,20 @@ class Actor(torch.nn.Module):
         self.head = head
 
     def initialize(
-        self, observation_space, action_space, observation_normalizer=None
-    ):
+        self, observation_space, action_space, observation_normalizer=None, index=None
+    ):  
+        if observation_normalizer:
+            self.observation_normalizer = observation_normalizer.initialize(observation_space.shape)
+        print('encder', self.encoder)
         size = self.encoder.initialize(
-            observation_space, observation_normalizer)
+            observation_space, self.observation_normalizer, index = index)
         size = self.torso.initialize(size)
         # action_size = action_space.shape[0]
         action_size = 1
         self.head.initialize(size, action_size)
         print('--------------------------')
-        print('action size: ',action_size)
-        print('action space shape: ',action_space.shape) 
+        print(' size: ', size)
+        # print('action space shape: ',action_space.shape) 
         print('--------------------------')
 
     def forward(self, *inputs):
