@@ -179,28 +179,54 @@ class DeterministicPolicyGradient:
         for var in critic_variables:
             var.requires_grad = False
 
-        
         # self.optimizer.zero_grad()
         # actions = self.model.actor(observations)
-        actions = []
+        # actions = []
+        # for i in range(len(self.optimizers)):
+        #     self.optimizers[i].zero_grad()
+        #     actions.append(self.model.actors[i](observations).squeeze(-1))
+
+        # actions = torch.stack(actions)
+        # actions = torch.transpose(actions,0,1)
+
+        losses = []
         for i in range(len(self.optimizers)):
             self.optimizers[i].zero_grad()
-            actions.append(self.model.actors[i](observations).squeeze(-1))
-        actions = torch.stack(actions)
-        actions = torch.transpose(actions,0,1)
-        
-        values = self.model.critic(observations, actions)
-        loss = -values.mean()
 
-        loss.backward()
-        if self.gradient_clip > 0:
-            torch.nn.utils.clip_grad_norm_(self.variables, self.gradient_clip)
-        # self.optimizer.step()
-        for o in self.optimizers:
-            o.step()
+            # actions.append(self.model.actors[i](observations).squeeze(-1))
+            action = self.model.actors[i](observations).squeeze(-1)
+            actions = torch.zeros((100,4))
+            actions[:, i] = action
+
+            mask = torch.zeros_like(actions)
+            mask[:, i] = 1.0
+            masked_actions = actions * mask
+
+            values = self.model.critic(observations,masked_actions)
+            loss = -values.mean()
+            losses.append(loss)
+
+            loss.backward()
+            if self.gradient_clip > 0:
+                torch.nn.utils.clip_grad_norm_(self.variables, self.gradient_clip)
+            # self.optimizer.step()
+            self.optimizers[i].step()
+            self.model.critic.zero_grad()
+
+        # values = self.model.critic(observations, actions)
+        # loss = -values.mean()
+
+        # loss.backward()
+        # if self.gradient_clip > 0:
+        #     torch.nn.utils.clip_grad_norm_(self.variables, self.gradient_clip)
+        # # self.optimizer.step()
+        # for o in self.optimizers:
+        #     o.step()
 
         for var in critic_variables:
             var.requires_grad = True
+        
+        loss = sum(losses) / len(losses)
 
         return dict(loss=loss.detach())
 

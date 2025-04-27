@@ -38,7 +38,7 @@ class ActorCriticWithTargets(torch.nn.Module):
         for a in range(num_actors):
             self.actors.append(copy.deepcopy(actor))
         self.critic = critic
-        self.target_actor = copy.deepcopy(actor)
+        # self.target_actor = copy.deepcopy(actor)
         for a in range(num_actors):
             self.target_actors.append(copy.deepcopy(self.actors[a]))
         self.target_critic = copy.deepcopy(critic)
