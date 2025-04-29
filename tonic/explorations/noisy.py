@@ -24,7 +24,7 @@ class NoActionNoise:
     def update(self, resets):
         pass
 
-
+# TODO add noise to each actor individually
 class NormalActionNoise:
     def __init__(self, scale=0.1, start_steps=20000):
         self.scale = scale
