@@ -28,25 +28,28 @@ class ActorCritic(torch.nn.Module):
 
 class ActorCriticWithTargets(torch.nn.Module):
     def __init__(
-        self, actor, num_actors, critic, observation_normalizer=None,
-        return_normalizer=None, target_coeff=0.005
+        self, actor, num_actors, actors, target_actors, critic, observation_normalizer=None,
+        return_normalizer=None, target_coeff=0.005, 
     ):
         super().__init__()
-        self.actors = []
-        self.target_actors = []
+        self.actors = actors
+        print('actors len', len(actors))
+        self.target_actors = target_actors
         # self.actor = actor
-        for a in range(num_actors):
-            self.actors.append(copy.deepcopy(actor))
+        # for a in range(num_actors):
+        #     self.actors.append(copy.deepcopy(actor))
         self.critic = critic
         self.target_actor = copy.deepcopy(actor)
         for a in range(num_actors):
-            self.target_actors.append(copy.deepcopy(self.actors[a]))
+            # self.target_actors.append(copy.deepcopy(self.actors[a]))
+            self.target_actors[a] = copy.deepcopy(self.actors[a])
         self.target_critic = copy.deepcopy(critic)
         self.observation_normalizer = observation_normalizer
         # for index in range(num_actors):
         #     self.observation_normalizers.append(copy.deepcopy(observation_normalizer))
         self.return_normalizer = return_normalizer
         self.target_coeff = target_coeff
+        # self.actor = self.actors
 
     def initialize(self, observation_space, action_space):
         # if self.observation_normalizer:
