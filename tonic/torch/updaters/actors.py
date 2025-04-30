@@ -202,7 +202,7 @@ class DeterministicPolicyGradient:
         for i in range(len(self.optimizers)):
             self.optimizers[i].zero_grad()
             
-            if i == 0:
+            if i %2== 0:
                 act = self.model.actors[i](observations).squeeze(-1)
                 actions.append(act)
                 present_action.append(act)
@@ -215,7 +215,8 @@ class DeterministicPolicyGradient:
 
                 act = self.model.actors[i](new_observations).squeeze(-1)
                 actions.append(act)
-                present_action.append(act)
+                # present_action.append(act)
+                present_action = []
                 
 
         actions = torch.stack(actions)

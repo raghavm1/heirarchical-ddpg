@@ -10,7 +10,9 @@ class Trainer:
     '''Trainer used to train and evaluate an agent on an environment.'''
 
     def __init__(
-        self, steps=int(1e7), epoch_steps=int(2e4), save_steps=int(5e5),
+        # self, steps=int(1e7), epoch_steps=int(500), save_steps=int(500),
+        self, steps=int(1e7), epoch_steps=int(2e4), save_steps=int(1e5),
+        # self, steps=int(1e7), epoch_steps=int(2e4), save_steps=int(5e5),
         test_episodes=5, show_progress=True, replace_checkpoint=False,
     ):
         self.max_steps = steps

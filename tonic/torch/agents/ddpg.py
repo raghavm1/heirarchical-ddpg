@@ -100,8 +100,9 @@ class DDPG(agents.Agent):
             # actions.append(a(observations).squeeze(-1)) # TODO check if need tensor
             actions = []
             present_action = []
-            for i in range(len(self.model.actors)):
-                if i == 0:
+
+            for i in range(len(self.model.actors)):  
+                if i %2 ==0:
                     act = self.model.actors[i](observations).squeeze(-1)
                     actions.append(act)
                     present_action.append(act)
@@ -110,8 +111,8 @@ class DDPG(agents.Agent):
                     new_observations = torch.cat([present_action_tensor, observations], dim=-1)
                     act = self.model.actors[i](new_observations).squeeze(-1)
                     actions.append(act)
-                    present_action.append(act)
-
+                    present_action = []
+            
             actions = torch.stack(actions)
             actions = torch.transpose(actions, 0, 1)
             return actions

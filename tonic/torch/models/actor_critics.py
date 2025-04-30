@@ -57,21 +57,32 @@ class ActorCriticWithTargets(torch.nn.Module):
         # self.actor.initialize(
         #     observation_space, action_space, self.observation_normalizer)
 
-        add_observation=0
-        for a in self.actors:
-            a.initialize(
-            observation_space, action_space, self.observation_normalizer, index=add_observation)
-            add_observation += 1
+        # add_observation=1
+        for i in range(len(self.actors)):
+            if i%2 ==0:
+                self.actors[i].initialize(
+                observation_space, action_space, self.observation_normalizer, index=0)
+            else:
+                self.actors[i].initialize(
+                observation_space, action_space, self.observation_normalizer, index=1)
+            # add_observation += 1
+        
         self.critic.initialize(
             observation_space, action_space, self.observation_normalizer,
             self.return_normalizer)
         # self.target_actor.initialize(
         #     observation_space, action_space, self.observation_normalizer)
-        add_observation=0
-        for a in self.target_actors:
-            a.initialize(
-            observation_space, action_space, self.observation_normalizer, index = add_observation)
-            add_observation += 1
+
+        # add_observation=0
+        for i in range(len(self.target_actors)):
+            if i %2==0:
+                self.target_actors[i].initialize(
+                observation_space, action_space, self.observation_normalizer, index = 0)
+            else:
+                self.target_actors[i].initialize(
+                observation_space, action_space, self.observation_normalizer, index = 1)
+            # add_observation += 1
+
         self.target_critic.initialize(
             observation_space, action_space, self.observation_normalizer,
             self.return_normalizer)
