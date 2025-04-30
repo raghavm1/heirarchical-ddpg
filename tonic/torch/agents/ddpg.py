@@ -11,42 +11,57 @@ def default_model():
             encoder=models.ObservationEncoder(),
             # torso=models.MLP((256, 256), torch.nn.ReLU),
             torso=models.MLP((64, 64), torch.nn.ReLU),
-            head=models.DeterministicPolicyHead()),
+            head=models.DeterministicPolicyHead(),
+        ),
         critic=models.Critic(
             encoder=models.ObservationActionEncoder(),
             torso=models.MLP((64, 64), torch.nn.ReLU),
-            head=models.ValueHead()),
+            head=models.ValueHead(),
+        ),
         observation_normalizer=normalizers.MeanStd(),
         # num_actors = 4) # TODO get 4 from action size
-        num_actors = 4,  actors=nn.ModuleList([
-            models.Actor(
-                encoder=models.ObservationEncoder(),
-                torso=models.MLP((64, 64), torch.nn.ReLU),
-                head=models.DeterministicPolicyHead()
-            ) for _ in range(4)]), target_actors = nn.ModuleList([
-            models.Actor(
-                encoder=models.ObservationEncoder(),
-                torso=models.MLP((64, 64), torch.nn.ReLU),
-                head=models.DeterministicPolicyHead()
-            ) for _ in range(4)])) # TODO get 4 from action size
+        num_actors=8,
+        actors=nn.ModuleList(
+            [
+                models.Actor(
+                    encoder=models.ObservationEncoder(),
+                    torso=models.MLP((64, 64), torch.nn.ReLU),
+                    head=models.DeterministicPolicyHead(),
+                )
+                for _ in range(8)
+            ]
+        ),
+        target_actors=nn.ModuleList(
+            [
+                models.Actor(
+                    encoder=models.ObservationEncoder(),
+                    torso=models.MLP((64, 64), torch.nn.ReLU),
+                    head=models.DeterministicPolicyHead(),
+                )
+                for _ in range(8)
+            ]
+        ),
+    )  # TODO get 4 from action size
 
 
 class DDPG(agents.Agent):
-    '''Deep Deterministic Policy Gradient.
+    """Deep Deterministic Policy Gradient.
     DDPG: https://arxiv.org/pdf/1509.02971.pdf
-    '''
+    """
 
     def __init__(
-        self, model=None, replay=None, exploration=None, actor_updater=None,
-        critic_updater=None
+        self,
+        model=None,
+        replay=None,
+        exploration=None,
+        actor_updater=None,
+        critic_updater=None,
     ):
         self.model = model or default_model()
         self.replay = replay or replays.Buffer()
         self.exploration = exploration or explorations.NormalActionNoise()
-        self.actor_updater = actor_updater or \
-            updaters.DeterministicPolicyGradient()
-        self.critic_updater = critic_updater or \
-            updaters.DeterministicQLearning()
+        self.actor_updater = actor_updater or updaters.DeterministicPolicyGradient()
+        self.critic_updater = critic_updater or updaters.DeterministicQLearning()
 
     def initialize(self, observation_space, action_space, seed=None):
         super().initialize(seed=seed)
@@ -73,16 +88,22 @@ class DDPG(agents.Agent):
     def update(self, observations, rewards, resets, terminations, steps):
         # Store the last transitions in the replay.
         self.replay.store(
-            observations=self.last_observations, actions=self.last_actions,
-            next_observations=observations, rewards=rewards, resets=resets,
-            terminations=terminations)
+            observations=self.last_observations,
+            actions=self.last_actions,
+            next_observations=observations,
+            rewards=rewards,
+            resets=resets,
+            terminations=terminations,
+        )
 
         # Prepare to update the normalizers.
         # if self.model.observation_normalizer:
         #     self.model.observation_normalizer.record(self.last_observations)
         # if self.model.return_normalizer:
         #     self.model.return_normalizer.record(rewards)
-        if self.model.observation_normalizer:           # TODO whether to update all normalizers or a single
+        if (
+            self.model.observation_normalizer
+        ):  # TODO whether to update all normalizers or a single
             self.model.observation_normalizer.record(self.last_observations)
         if self.model.return_normalizer:
             self.model.return_normalizer.record(rewards)
@@ -106,8 +127,12 @@ class DDPG(agents.Agent):
                     actions.append(act)
                     present_action.append(act)
                 else:
-                    present_action_tensor = torch.stack(present_action, dim=-1)  # Stack into tensor
-                    new_observations = torch.cat([present_action_tensor, observations], dim=-1)
+                    present_action_tensor = torch.stack(
+                        present_action, dim=-1
+                    )  # Stack into tensor
+                    new_observations = torch.cat(
+                        [present_action_tensor, observations], dim=-1
+                    )
                     act = self.model.actors[i](new_observations).squeeze(-1)
                     actions.append(act)
                     present_action.append(act)
@@ -120,8 +145,7 @@ class DDPG(agents.Agent):
         return self._greedy_actions(observations).numpy()
 
     def _update(self, steps):
-        keys = ('observations', 'actions', 'next_observations', 'rewards',
-                'discounts')
+        keys = ("observations", "actions", "next_observations", "rewards", "discounts")
 
         # Update both the actor and the critic multiple times.
         for batch in self.replay.get(*keys, steps=steps):
@@ -130,7 +154,7 @@ class DDPG(agents.Agent):
 
             for key in infos:
                 for k, v in infos[key].items():
-                    logger.store(key + '/' + k, v.numpy())
+                    logger.store(key + "/" + k, v.numpy())
 
         # Update the normalizers.
         if self.model.observation_normalizer:
@@ -142,7 +166,8 @@ class DDPG(agents.Agent):
         self, observations, actions, next_observations, rewards, discounts
     ):
         critic_infos = self.critic_updater(
-            observations, actions, next_observations, rewards, discounts)
+            observations, actions, next_observations, rewards, discounts
+        )
         actor_infos = self.actor_updater(observations)
         self.model.update_targets()
         return dict(critic=critic_infos, actor=actor_infos)
