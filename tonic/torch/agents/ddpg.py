@@ -2,7 +2,22 @@ import torch
 
 from tonic import explorations, logger, replays  # noqa
 from tonic.torch import agents, models, normalizers, updaters
+from torch import nn
 
+
+# def default_model():
+#     return models.ActorCriticWithTargets(
+#         actor=models.Actor(
+#             encoder=models.ObservationEncoder(),
+#             # torso=models.MLP((256, 256), torch.nn.ReLU),
+#             torso=models.MLP((64, 64), torch.nn.ReLU),
+#             head=models.DeterministicPolicyHead()),
+#         critic=models.Critic(
+#             encoder=models.ObservationActionEncoder(),
+#             torso=models.MLP((256, 256), torch.nn.ReLU),
+#             head=models.ValueHead()),
+#         observation_normalizer=normalizers.MeanStd(),
+#         num_actors = 4) # TODO get 4 from action size
 
 def default_model():
     return models.ActorCriticWithTargets(
@@ -13,10 +28,21 @@ def default_model():
             head=models.DeterministicPolicyHead()),
         critic=models.Critic(
             encoder=models.ObservationActionEncoder(),
-            torso=models.MLP((256, 256), torch.nn.ReLU),
+            torso=models.MLP((64, 64), torch.nn.ReLU),
             head=models.ValueHead()),
         observation_normalizer=normalizers.MeanStd(),
-        num_actors = 4) # TODO get 4 from action size
+        # num_actors = 4) # TODO get 4 from action size
+        num_actors = 4,  actors=nn.ModuleList([
+            models.Actor(
+                encoder=models.ObservationEncoder(),
+                torso=models.MLP((64, 64), torch.nn.ReLU),
+                head=models.DeterministicPolicyHead()
+            ) for _ in range(4)]), target_actors = nn.ModuleList([
+            models.Actor(
+                encoder=models.ObservationEncoder(),
+                torso=models.MLP((64, 64), torch.nn.ReLU),
+                head=models.DeterministicPolicyHead()
+            ) for _ in range(4)])) # TODO get 4 from action size
 
 
 class DDPG(agents.Agent):
