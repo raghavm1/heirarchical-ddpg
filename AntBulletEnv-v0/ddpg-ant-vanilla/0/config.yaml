@@ -5,7 +5,7 @@ checkpoint: last
 environment: tonic.environments.Bullet('AntBulletEnv-v0', render=True)
 environment_name: null
 header: import tonic.torch
-name: ddpg-ant
+name: ddpg-ant-vanilla
 parallel: 1
 path: null
 seed: 0
