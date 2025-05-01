@@ -18,17 +18,17 @@ def default_model():
             head=models.ValueHead()),
         observation_normalizer=normalizers.MeanStd(),
         # num_actors = 4) # TODO get 4 from action size
-        num_actors = 4,  actors=nn.ModuleList([
+        num_actors = 8,  actors=nn.ModuleList([
             models.Actor(
                 encoder=models.ObservationEncoder(),
                 torso=models.MLP((64, 64), torch.nn.ReLU),
                 head=models.DeterministicPolicyHead()
-            ) for _ in range(4)]), target_actors = nn.ModuleList([
+            ) for _ in range(8)]), target_actors = nn.ModuleList([
             models.Actor(
                 encoder=models.ObservationEncoder(),
                 torso=models.MLP((64, 64), torch.nn.ReLU),
                 head=models.DeterministicPolicyHead()
-            ) for _ in range(4)])) # TODO get 4 from action size
+            ) for _ in range(8)])) # TODO get 4 from action size
 
 
 class DDPG(agents.Agent):
