@@ -195,7 +195,8 @@ class DeterministicPolicyGradient:
 
             # actions.append(self.model.actors[i](observations).squeeze(-1))
             action = self.model.actors[i](observations).squeeze(-1)
-            actions = torch.zeros((100,4))
+            # actions = torch.zeros((100,4))
+            actions = torch.zeros((100,8))
             actions[:, i] = action
 
             mask = torch.zeros_like(actions)
