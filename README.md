@@ -1,53 +1,8 @@
-# Tonic
+# Hierarchical RL by decomposing Action Space on Actor-Critic Methods
 
-<div align="center">
-  <img src="data/images/logo.png" width=40%><br><br>
-</div>
+## Abstract
 
-Welcome to the Tonic RL library!
-
-Please take a look at [the paper](https://arxiv.org/abs/2011.07537) for details
-and results.
-
-The main design principles are:
-
-* **Modularity:** Building blocks for creating RL agents, such as models,
-replays, or exploration strategies, are implemented as configurable modules.
-
-* **Readability:** Agents are written in a simple way with an identical API and
-logs are nicely displayed on the terminal with a progress bar.
-
-* **Fair comparison:** The training pipeline is unique and compatible with all
-Tonic agents and environments. Agents are defined by their core ideas while
-general tricks/improvements like
-[non-terminal timeouts](https://arxiv.org/pdf/1712.00378.pdf),
-observation normalization and action scaling are shared.
-
-* **Benchmarking:** Benchmark data of the provided agents trained on
-[70 continuous control environments](https://github.com/fabiopardo/tonic_data/blob/master/images/benchmark.pdf)
-are provided for direct comparison.
-
-* **Wrapped popular environments:** Environments from
-[OpenAI Gym](https://github.com/openai/gym),
-[PyBullet](https://github.com/bulletphysics/bullet3) and
-[DeepMind Control Suite](https://github.com/deepmind/dm_control) are made
-compatible with
-[non-terminal timeouts](https://arxiv.org/pdf/1712.00378.pdf) and synchronous
-distributed training.
-
-* **Compatibility with different ML frameworks:** Both TensorFlow 2 and PyTorch
-are currently supported. Simply import `tonic.tensorflow` or `tonic.torch`.
-
-* **Experimenting from the console:** While launch scripts can be used,
-iterating over various configurations from a console is made possible using
-snippets of Python code directly.
-
-* **Visualization of trained agents:** Experiment configurations and
-checkpoints can be loaded to play with trained agents.
-
-* **Collection of trained models:** To keep the main Tonic repository light,
-the full logs and trained models from the benchmark are available in the
-[tonic_data repository](https://github.com/fabiopardo/tonic_data).
+In Hierarchical RL, typically, different sub-policies handle different tasks that might be hierarchical in nature. Instead, we want to decompose the available multi-dimensional continuous action space across sub-policies while trying to learn an overall global task. We aim to experiment with variants of different hierarchies in environments pertaining to locomotion where multiple joints (our action space) are controlled. We aim to perform this study on actor-critic based algorithms, and experiment with a hybrid approach involving hierarchical and modular action policies.
 
 # Instructions
 
