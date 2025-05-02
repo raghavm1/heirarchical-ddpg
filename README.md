@@ -155,6 +155,8 @@ python3 -m tonic.plot \
 
 # Credit
 
+This work is made possible by the mighty Fabio Pardo and his amazing work Tonic RL!
+
 ## Other code bases
 
 Tonic was inspired by a number of other deep RL code bases. In particular,
@@ -162,15 +164,14 @@ Tonic was inspired by a number of other deep RL code bases. In particular,
  [Spinning Up in Deep RL](https://github.com/openai/spinningup)
 and [Acme](https://github.com/deepmind/acme).
 
-## Citing Tonic
+## Cite
 
-If you use Tonic in your research, please cite the [paper](https://arxiv.org/abs/2011.07537):
+Like our work? Cite, share and subscribe (star)
 
 ```
-@article{pardo2020tonic,
-    title={Tonic: A Deep Reinforcement Learning Library for Fast Prototyping and Benchmarking},
-    author={Pardo, Fabio},
-    journal={arXiv preprint arXiv:2011.07537},
-    year={2020}
+@article{shaan2025hierarchical,
+    title={Hierarchical RL by decomposing Action Space on Actor-Critic Methods},
+    author={Aryaman Shaan, Garvit Banga, Raghav Mantri},
+    year={2025}
 }
 ```
