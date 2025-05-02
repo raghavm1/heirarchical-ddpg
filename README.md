@@ -1,8 +1,26 @@
-# Hierarchical RL by decomposing Action Space on Actor-Critic Methods
+# [Hierarchical RL by decomposing Action Space on Actor-Critic Methods](https://raghavm1.github.io/hierarchical-ddpg-projectpage/)
 
 ## Abstract
 
 In Hierarchical RL, typically, different sub-policies handle different tasks that might be hierarchical in nature. Instead, we want to decompose the available multi-dimensional continuous action space across sub-policies while trying to learn an overall global task. We aim to experiment with variants of different hierarchies in environments pertaining to locomotion where multiple joints (our action space) are controlled. We aim to perform this study on actor-critic based algorithms, and experiment with a hybrid approach involving hierarchical and modular action policies.
+
+This codebase has multiple branches, each branch contains code for a hierarchical approach -
+
+- master - contains code for the monolithic (vanilla approach)
+- modular
+- hierarchical
+- hybrid
+- cheenti 🐜 - code for using the ant environment in PyBullet, but in hierarchical action splitting. There are different branches named cheenti<x> where x is a different approach.
+- results - all results with plots and videos
+
+To run this code, same commands as in Tonic RL can be used, for the DDPG algorithm. Our work only focuses on the DDPG algorithm.
+
+## Environments
+
+We use 2 environments 
+
+- BipedalWalker-v3
+- AntBullet-v0
 
 # Instructions
 
